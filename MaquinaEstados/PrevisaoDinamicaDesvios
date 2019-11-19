@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+int main(){
+    int erros=0,qtdacerto=0,qtderros=0;
+    char c,d='N';
+    FILE * pfile;
+    pfile = fopen("caracteres.txt","r");
+    while(!feof(pfile)){
+        c = getc(pfile);
+        if(c=='N'||c=='T'){
+            if(c==d)
+                qtdacerto++;
+            else if(c!=d && erros<=1){
+                erros++;
+                qtderros++;
+            }
+            else if(c!=d && erros>1){
+                erros=0;
+                d='T';
+                qtderros++;
+            }
+        }
+    }
+     fclose(pfile);
+     printf("Quantidade de acertos: %d, quantidade de erros: %d",qtdacerto,qtderros);
+     return 0;
+}
