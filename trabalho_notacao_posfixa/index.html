@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>Conversão de expressão Infixada para Pós-fixada</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">In2Pos</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="text-center">Expressão Infixada para Pós-fixada</h1>
+        <form class="text-center">
+            <label class="form-control" for="infixa">Insira a expressao
+                <input type="text" class="form-control" name="infixa" id="infixa" placeholder="Insira a expressão">
+                <br><input type="button" class="btn btn-success" value="Calcular" onClick="calculaIn2Pos()">
+                <input type="button" class="btn btn-warning" value="Limpar" onClick="limpa()">
+            </label>
+        </form>
+
+        <div id="resultado">
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+        crossorigin="anonymous"></script>
+    <script>
+        function prioridade(operacao) {
+            if (operacao == '+' || operacao == '-')
+                return 1;
+            else if (operacao == '*' || operacao == '/')
+                return 2;
+            else
+                return 0;
+        }
+
+        function topStack(pilha) {
+            posicaoFinal = (pilha.length) - 1;
+            return pilha[posicaoFinal];
+        }
+
+        function ehOperando(caractere) {
+            if (caractere >= 0 && caractere <= 9)
+                return 1;
+            return -1;
+        }
+
+        function ehOperador(caractere) {
+            if (caractere == '+' || caractere == '-' || caractere == '*' || caractere == '/')
+                return 1;
+            return -1;
+        }
+
+        function operacao(a, b, opr) {
+            a = parseFloat(a);
+            b = parseFloat(b);
+            if (opr == '+')
+                return b + a;
+            else if (opr == '-')
+                return b - a;
+            else if (opr == '*')
+                return b * a;
+            else if (opr == '/')
+                return b / a;
+        }
+
+        function calculaResultado(expressaoPos) {
+            var a, b, pilha = [], i = 0;
+            for (i; i < expressaoPos.length; i++) {
+                if (ehOperador(expressaoPos[i]) != -1) {
+                    a = topStack(pilha);
+                    pilha.pop();
+                    b = topStack(pilha);
+                    pilha.pop();
+                    pilha.push(operacao(a, b, expressaoPos[i]));
+                } else if (ehOperando(expressaoPos[i]) > 0) {
+                    pilha.push(expressaoPos[i]);
+                }
+            }
+            return topStack(pilha);
+        }
+
+        function calculaIn2Pos() {
+            $('.posfixa').remove();
+            var pilha = [], saida = [];
+            var c, t, i = 0;
+            if ($('#infixa').val() == '') {
+                var linha = '<div class="alert alert-danger mt-1 posfixa" role="alert">';
+                linha += '<p class="text-center"> Insira uma expressão para calcular </p>';
+                linha += '</div>';
+                $('#resultado').append(linha);
+            } else {
+                var expressao = ($('#infixa').val()).split('');
+
+                for (i; i < expressao.length; i++) {
+                    if (expressao[i] == '+' || expressao[i] == '-' || expressao[i] == '*' || expressao[i] == '/') {
+                        while (pilha.length > 0 && prioridade(topStack(pilha)) >= prioridade(expressao[i])) {
+                            saida.push(topStack(pilha));
+                            pilha.pop();
+                        }
+                        pilha.push(expressao[i]);
+                    } else if (expressao[i] == '(') {
+                        pilha.push(expressao[i]);
+                    } else if (expressao[i] == ')') {
+                        while (topStack(pilha) != '(') {
+                            saida.push(topStack(pilha));
+                            pilha.pop();
+                        }
+                        pilha.pop();
+                    } else {
+                        saida.push(expressao[i]);
+                    }
+                }
+                while (pilha.length > 0) {
+                    saida.push(topStack(pilha));
+                    pilha.pop();
+                }
+
+                var saidaConcatenada = '';
+                saida.forEach(function (item, index) {
+                    saidaConcatenada += item;
+                });
+
+                var resultadoExpressao = calculaResultado(saida);
+
+                var linha = '<div class="alert alert-info mt-1 posfixa" role="alert">';
+                linha += '<p class="text-center"> Expressão pós-fixada: ' + saidaConcatenada + ' </p>';
+                linha += '<p class="text-center"> Resultado: ' + resultadoExpressao + ' </p>';
+                linha += '</div>';
+                $('#resultado').append(linha);
+            }
+        }
+
+        function limpa() {
+            $('.posfixa').remove();
+            $('#infixa').val('');
+        }
+    </script>
+</body>
+
+</html>
